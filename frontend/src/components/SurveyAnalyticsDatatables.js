@@ -11,6 +11,8 @@ import "datatables.net-colreorder/js/dataTables.colReorder.js";
 import "datatables.net-rowgroup/js/dataTables.rowGroup.js";
 import "datatables.net-colreorder-dt/css/colReorder.dataTables.css";
 import "survey-analytics/survey.analytics.datatables.css";
+import { useLocalCheck } from '../hooks/useLocalCheck';
+
 
 export default class SurveyAnalyticsDatatables extends Component {
   state = {
@@ -21,6 +23,11 @@ export default class SurveyAnalyticsDatatables extends Component {
   };
 
   async componentDidMount() {
+    if (!useLocalCheck()) {
+      this.setState({ loading: false });
+      return;
+    }
+
     DataTables.initJQuery($);
     try {
       const surveyJsonResponse = await fetch('/survey-json');
@@ -51,6 +58,10 @@ export default class SurveyAnalyticsDatatables extends Component {
   }
 
   render() {
+    if (!useLocalCheck()) {
+      return <div>Access Denied: This page is only accessible from localhost.</div>;
+    }
+
     const { loading, error } = this.state;
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error.message}</div>;

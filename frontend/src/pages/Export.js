@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Model } from "survey-core";
 import { SurveyPDF } from "survey-pdf";
+import { useLocalCheck } from '../hooks/useLocalCheck';
 
 function savePDF(json) {
     return function() {
@@ -13,6 +14,7 @@ function savePDF(json) {
 }
 
 export function ExportToPDFPage() {
+    const isLocalhost = useLocalCheck();
     const [surveyJson, setSurveyJson] = useState(null);
 
     useEffect(() => {
@@ -32,6 +34,10 @@ export function ExportToPDFPage() {
         fetchSurveyJson();
     }, []);
 
+    if (!isLocalhost) {
+        return <div>Access Denied: This page is only accessible from localhost.</div>;
+    }
+
     if (!surveyJson) {
         return <div className="container">Loading...</div>;
     }
@@ -40,7 +46,6 @@ export function ExportToPDFPage() {
 
     return (
         <div className="container">
-            <h1>SurveyJS PDF Export</h1>
             <div className="jumbotron">
                 <p>SurveyJS PDF Export is a client-side extension over the SurveyJS Library that enables users to save surveys as PDF documents.</p>
                 <p>NOTE: Dynamic elements and characteristics (visibility, validation, navigation buttons) are not supported.</p>

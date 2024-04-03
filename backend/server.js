@@ -8,6 +8,21 @@ const PORT = 5001;
 
 app.use(bodyParser.json());
 
+// Middleware to restrict access to local-only routes
+function localAccessOnly(req, res, next) {
+    const ip = req.ip ||
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        req.connection.socket.remoteAddress;
+
+    // Check if the IP is a local IP
+    if (ip === "127.0.0.1" || ip === "::1" || ip === "::ffff:127.0.0.1") {
+        next(); // It's a local request, proceed to the next middleware
+    } else {
+        res.status(403).send('Access Denied: This page is only accessible locally.');
+    }
+}
+
 // Endpoint to serve survey.json
 app.get('/survey-json', (req, res) => {
     res.sendFile(path.join(__dirname, 'data/survey.json'));
@@ -65,6 +80,8 @@ app.post('/submit-survey', async (req, res) => {
         res.status(500).send('Error saving survey data');
     }
 });
+
+app.use('/get-all-survey-results', localAccessOnly);
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

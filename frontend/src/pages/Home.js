@@ -1,6 +1,13 @@
+import React from 'react';
 import logo from "../logo.svg";
+import { useLocalCheck } from '../hooks/useLocalCheck';
 
 export function HomePage() {
+    const isLocalhost = useLocalCheck();
+
+    if (!isLocalhost) {
+        return <div>Access Denied: This page is only accessible from localhost.</div>;
+    }
   return (
     <div className="container">
       <div className="col-lg-3 centered">

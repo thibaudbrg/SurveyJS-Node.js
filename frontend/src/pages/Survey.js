@@ -78,7 +78,6 @@ export function SurveyPage() {
 
   return (
       <div className="container">
-        <h1>SurveyJS Library / Runner</h1>
         <SurveyComponent
             model={model}
             onComplete={onComplete}

@@ -6,6 +6,7 @@ import { Tabulator } from "survey-analytics/survey.analytics.tabulator.js";
 import { Model } from "survey-core";
 import "survey-analytics/survey.analytics.tabulator.css";
 import "tabulator-tables/dist/css/tabulator.min.css";
+import { useLocalCheck } from '../hooks/useLocalCheck';
 
 window.jsPDF = jsPDF;
 window.XLSX = XLSX;
@@ -19,6 +20,11 @@ export default class SurveyAnalyticsTabulator extends Component {
   };
 
   async componentDidMount() {
+    if (!useLocalCheck()) {
+      this.setState({ loading: false });
+      return;
+    }
+
     try {
       const surveyJsonResponse = await fetch('/survey-json');
       if (!surveyJsonResponse.ok) {
@@ -48,6 +54,10 @@ export default class SurveyAnalyticsTabulator extends Component {
   }
 
   render() {
+    if (!useLocalCheck()) {
+      return <div>Access Denied: This page is only accessible from localhost.</div>;
+    }
+
     const { loading, error } = this.state;
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error.message}</div>;
