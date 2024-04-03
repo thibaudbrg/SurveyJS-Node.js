@@ -32,22 +32,40 @@ export function SurveyPage() {
     console.log("Value changed: ", options.value);
   }
 
-  function transformResults(surveyModel, data) {
+  function transformResults(model, data) {
     let results = {};
     for (let [key, value] of Object.entries(data)) {
-      const question = surveyModel.getQuestionByName(key);
+      const question = model.getQuestionByName(key);
       if (question) {
-        let questionTitle = question.title || key;
-        let answerText = question.choices
-            ? question.choices.find(choice => choice.value === value)?.text || value
-            : value;
-        results[key] = answerText;
+        // Handle questions with predefined choices
+        if (question.choices && Array.isArray(value)) {
+          // For multiple choice questions
+          let answerTexts = value.map(val => {
+            const choice = question.choices.filter(choice => choice.value === val)[0];
+            return choice ? choice.text : val;
+          });
+
+          // Check for and append "-Comment" field if "other" is selected
+          if (value.includes('other') && data[`${key}-Comment`]) {
+            answerTexts.push(`Other: ${data[`${key}-Comment`]}`);
+          }
+
+          results[key] = answerTexts;
+        } else if (question.choices) {
+          // For single choice questions
+          const choice = question.choices.filter(choice => choice.value === value)[0];
+          results[key] = choice ? choice.text : value;
+        } else {
+          // For text input and other non-choice questions
+          results[key] = value;
+        }
       } else {
-        results[key] = value;
+        results[key] = value; // Include as is if question not found
       }
     }
     return results;
   }
+
 
   function onComplete(survey) {
     const surveyData = survey.data;
